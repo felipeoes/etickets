@@ -35,6 +35,19 @@ class User(StructuredNode):
     def __repr__(self):
         return '<User: {}>'.format(self.name)
     
+    def to_dict(self):
+        return {
+            'uid': self.uid,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'cpf': self.cpf,
+            'address': self.address,
+            'cep': self.cep,
+            'city': self.city,
+            'state': self.state,
+        }
+    
 class Ticket(StructuredNode):
     uid = UniqueIdProperty()
     name = StringProperty(required=True)
