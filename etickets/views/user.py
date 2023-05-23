@@ -2,25 +2,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from etickets.models import User
-
-
-def error_decorator(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            return Response({'error': str(e)})
-    return wrapper
+from etickets.utils import error_decorator
 
 
 # retrieve all user nodes
-class UserList(APIView):
+class UsersList(APIView):
     @error_decorator
     def get(self, request):
         users = [user.to_dict() for user in User.nodes.all()]
         return Response(users)
 
 # class for User CRUD operations
+
+
 class UserDetail(APIView):
     @error_decorator
     def get(self, request, email):

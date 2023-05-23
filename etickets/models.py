@@ -1,4 +1,4 @@
-# Descrição do Projeto: Uma plataforma de troca e (vendas de ingressos) . 
+# Descrição do Projeto: Uma plataforma de troca e (vendas de ingressos) .
 
 # Tema: Banco de Dados em Grafos (Neo4J)
 
@@ -10,8 +10,8 @@
 from neomodel import StructuredNode, StringProperty, IntegerProperty, DateTimeProperty, UniqueIdProperty, RelationshipTo
 
 TRANSACTION_STATUSES = (
-     (0, 'Pendente'),
-     (1, 'Aceita'),
+    (0, 'Pendente'),
+    (1, 'Aceita'),
     (2, 'Recusada'),
 )
 
@@ -28,13 +28,13 @@ class User(StructuredNode):
     state = StringProperty(required=False)
     tickets = RelationshipTo('Ticket', 'HAS_TICKET')
     interests = RelationshipTo('Ticket', 'INTERESTED_IN')
-    
+
     def __str__(self):
         return self.name
-    
+
     def __repr__(self):
         return '<User: {}>'.format(self.name)
-    
+
     def to_dict(self):
         return {
             'uid': self.uid,
@@ -47,28 +47,46 @@ class User(StructuredNode):
             'city': self.city,
             'state': self.state,
         }
-    
+
+
 class Ticket(StructuredNode):
     uid = UniqueIdProperty()
     name = StringProperty(required=True)
     event = StringProperty(required=True)
     datetime = DateTimeProperty(required=True)
     location = StringProperty(required=True)
-    
+    quantity = IntegerProperty(default=0)
+
     def __str__(self):
         return self.name
-    
+
     def __repr__(self):
         return '<Ticket: {}>'.format(self.name)
+
+    def to_dict(self):
+        return {
+            'uid': self.uid,
+            'name': self.name,
+            'event': self.event,
+            'datetime': self.datetime,
+            'location': self.location,
+            'quantity': self.quantity,
+        }
 
 class Trade(StructuredNode):
     uid = UniqueIdProperty()
     status = IntegerProperty(required=True, choices=TRANSACTION_STATUSES)
     tickets = RelationshipTo('Ticket', 'EXCHANGE_TICKETS')
     users = RelationshipTo('User', 'EXCHANGE_USERS')
-    
+
     def __str__(self):
         return self.uid
-    
+
     def __repr__(self):
         return f'<Trade: {self.uid} | Status : {self.status}>'
+    
+    def to_dict(self):
+        return {
+            'uid': self.uid,
+            'status': self.status,
+        }
