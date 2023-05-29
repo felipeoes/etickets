@@ -32,6 +32,7 @@ def create_fake_data(n_users: int = 10, n_tickets: int = 10, n_trades: int = 2):
             name=f'Ingresso {i}',
             event=f'Evento {i}',
             datetime=datetime.now(),
+            sector=f'Setor {i}',
             location=f'Local {i}'
         )
         try:

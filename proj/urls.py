@@ -12,9 +12,10 @@ urlpatterns = [
 
     # TICKETS
     path('tickets/list/', TicketsList.as_view()),
-    path('tickets/<str:uid>/', TicketDetail.as_view()),
-    path('search/tickets/<str:name>/<str:event>/<str:location>/',
-         TicketsSearch.as_view()),
+    path('tickets/', TicketDetail.as_view()),
+    path('tickets-locations/', TicketsLocations.as_view()),
+    path('tickets-search/', TicketsSearch.as_view()),
+
 
 ]
 

@@ -19,7 +19,7 @@ TRANSACTION_STATUSES = (
 class User(StructuredNode):
     uid = UniqueIdProperty()
     name = StringProperty(required=True)
-    email = StringProperty(unique_index=True)
+    email = StringProperty(unique_index=True, unique=True, required=True)
     phone = StringProperty(required=False)
     cpf = StringProperty(required=True)
     address = StringProperty(required=False)
@@ -55,6 +55,7 @@ class Ticket(StructuredNode):
     event = StringProperty(required=True)
     datetime = DateTimeProperty(required=True)
     location = StringProperty(required=True)
+    sector = StringProperty(required=True)
     quantity = IntegerProperty(default=0)
 
     def __str__(self):
@@ -68,6 +69,7 @@ class Ticket(StructuredNode):
             'uid': self.uid,
             'name': self.name,
             'event': self.event,
+            'sector': self.sector,
             'datetime': self.datetime,
             'location': self.location,
             'quantity': self.quantity,

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from etickets.models import User
+from etickets.models import User, Ticket
 from etickets.utils import error_decorator
 
 
@@ -11,6 +11,21 @@ class UsersList(APIView):
     def get(self, request):
         users = [user.to_dict() for user in User.nodes.all()]
         return Response(users)
+
+# Register user interest in a ticket
+class UserInterest(APIView):
+    @error_decorator
+    def post(self, request):
+        user = User.nodes.get(email=request.data['user_email'])
+        ticket = Ticket.nodes.get(uid=request.data['uid'])
+        user.interests.connect(ticket)
+        
+        data = {
+            'user': user.to_dict(),
+            'ticket': ticket.to_dict(),
+            'message': 'User interest registered successfully!'
+        }
+        return Response(data)
 
 # class for User CRUD operations
 
