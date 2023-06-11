@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from etickets.models import Ticket, User
 from etickets.utils import error_decorator
 from datetime import datetime
+from neomodel import db
 
 # retrieve all ticket nodes
 class TicketsList(APIView):
@@ -88,3 +89,35 @@ class TicketDetail(APIView):
         ticket = Ticket.nodes.get(uid=uid)
         ticket.delete()
         return Response(ticket.to_dict())
+
+# Class that returns the node IDs of all nodes in a cycle (if any)
+class TicketCycle(APIView):
+    @error_decorator
+    def get(self, request):
+        # uid = request.GET.get('uid', '')
+        id = request.GET.get('id', '')
+        # own_ticket = request.data['own_ticket']
+        # wished_ticket = request.data['wished_ticket']
+
+        # create arc between own_ticket and wished_ticket
+
+        # check if there are circles after the arc creation
+        query = f'''
+        MATCH n=(t:Ticket)-[*1..6]->(t)
+        WHERE ID(t) = {id}
+        RETURN n
+        '''
+
+        # Execute the query
+        results, meta = db.cypher_query(query)
+
+        nodes_for_cycle = {}
+        # lookup for cicles
+        for idx,cycle in enumerate(results):
+            # For each cycle, return the nodes if each cycle
+            list_node_c = []
+            for node_c in cycle[0]:
+                list_node_c.append(node_c.id)
+            nodes_for_cycle[idx]=list_node_c
+        
+        return Response(nodes_for_cycle)
