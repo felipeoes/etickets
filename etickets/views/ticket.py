@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 from etickets.models import Ticket, User
 from etickets.utils import error_decorator
@@ -90,6 +91,29 @@ class TicketDetail(APIView):
         ticket.delete()
         return Response(ticket.to_dict())
 
+class TicketExchangeOffer(APIView):
+    @error_decorator
+    def post(self, request):
+        # own_product_id = 799
+        # wished_product_id = 801
+        
+        own_ticket_id = request.data.get('own_ticket_id')
+        wished_ticket_id = request.data.get('wished_ticket_id')
+
+        query = f'''
+            MATCH (o:Ticket), (w:Ticket)
+            WHERE ID(o)={own_ticket_id} AND ID(w) = {wished_ticket_id}
+            CREATE (o)-[:EXCHANGE_OFFER]->(w)
+        '''
+        try:
+            db.cypher_query(query)
+            response_data = {'message': 'Relationship created successfully'}
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            error_message = str(e)
+            response_data = {'error': error_message}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
 # Class that returns the node IDs of all nodes in a cycle (if any)
 class TicketCycle(APIView):
     @error_decorator
@@ -103,13 +127,13 @@ class TicketCycle(APIView):
 
         # check if there are circles after the arc creation
         query = f'''
-        MATCH n=(t:Ticket)-[*1..6]->(t)
-        WHERE ID(t) = {id}
-        RETURN n
+            MATCH n=(t:Ticket)-[*1..10]->(t)
+            WHERE ID(t) = {id}
+            RETURN n
         '''
 
         # Execute the query
-        results, meta = db.cypher_query(query)
+        results, _ = db.cypher_query(query)
 
         nodes_for_cycle = {}
         # lookup for cicles

@@ -1,7 +1,7 @@
 from etickets.models import *
 from datetime import datetime
 import random
-
+random.seed(1)
 
 def create_fake_data(n_users: int = 100, n_tickets: int = 100, n_trades: int = 2):
 
