@@ -1,9 +1,9 @@
 from etickets.models import *
 from datetime import datetime
 import random
+random.seed(1)
 
-
-def create_fake_data(n_users: int = 10, n_tickets: int = 10, n_trades: int = 2):
+def create_fake_data(n_users: int = 100, n_tickets: int = 100, n_trades: int = 2):
 
     # Create users
     users = []
@@ -60,7 +60,7 @@ def create_fake_data(n_users: int = 10, n_tickets: int = 10, n_trades: int = 2):
     # Create relationships randomly
     for user in users:
         owned_ticket = random.choice(tickets)
-        interest_ticket = random.choice(tickets)
+        interest_ticket = random.choice(tickets)        
 
         user.tickets.connect(owned_ticket)
 
@@ -73,6 +73,9 @@ def create_fake_data(n_users: int = 10, n_tickets: int = 10, n_trades: int = 2):
             continue
 
         user.interests.connect(interest_ticket)
+
+        for user_ticket in user.tickets.all():
+            user_ticket.interests.connect(interest_ticket)
 
     for trade in trades:
         trade.tickets.connect(random.choice(tickets))

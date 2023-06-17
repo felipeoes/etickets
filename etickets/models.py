@@ -57,6 +57,7 @@ class Ticket(StructuredNode):
     location = StringProperty(required=True)
     sector = StringProperty(required=True)
     quantity = IntegerProperty(default=0)
+    interests = RelationshipTo('Ticket', 'EXCHANGE_OFFER')
 
     def __str__(self):
         return self.name

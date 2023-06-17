@@ -1,9 +1,11 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 from etickets.models import Ticket, User
 from etickets.utils import error_decorator
 from datetime import datetime
+from neomodel import db
 
 # retrieve all ticket nodes
 class TicketsList(APIView):
@@ -88,3 +90,58 @@ class TicketDetail(APIView):
         ticket = Ticket.nodes.get(uid=uid)
         ticket.delete()
         return Response(ticket.to_dict())
+
+class TicketExchangeOffer(APIView):
+    @error_decorator
+    def post(self, request):
+        # own_product_id = 799
+        # wished_product_id = 801
+        
+        own_ticket_id = request.data.get('own_ticket_id')
+        wished_ticket_id = request.data.get('wished_ticket_id')
+
+        query = f'''
+            MATCH (o:Ticket), (w:Ticket)
+            WHERE ID(o)={own_ticket_id} AND ID(w) = {wished_ticket_id}
+            CREATE (o)-[:EXCHANGE_OFFER]->(w)
+        '''
+        try:
+            db.cypher_query(query)
+            response_data = {'message': 'Relationship created successfully'}
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            error_message = str(e)
+            response_data = {'error': error_message}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+# Class that returns the node IDs of all nodes in a cycle (if any)
+class TicketCycle(APIView):
+    @error_decorator
+    def get(self, request):
+        # uid = request.GET.get('uid', '')
+        id = request.GET.get('id', '')
+        # own_ticket = request.data['own_ticket']
+        # wished_ticket = request.data['wished_ticket']
+
+        # create arc between own_ticket and wished_ticket
+
+        # check if there are circles after the arc creation
+        query = f'''
+            MATCH n=(t:Ticket)-[*1..10]->(t)
+            WHERE ID(t) = {id}
+            RETURN n
+        '''
+
+        # Execute the query
+        results, _ = db.cypher_query(query)
+
+        nodes_for_cycle = {}
+        # lookup for cicles
+        for idx,cycle in enumerate(results):
+            # For each cycle, return the nodes if each cycle
+            list_node_c = []
+            for node_c in cycle[0]:
+                list_node_c.append(node_c.id)
+            nodes_for_cycle[idx]=list_node_c
+        
+        return Response(nodes_for_cycle)

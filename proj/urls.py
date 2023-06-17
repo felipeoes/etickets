@@ -18,6 +18,8 @@ urlpatterns = [
     path('tickets/', TicketDetail.as_view()),
     path('tickets-locations/', TicketsLocations.as_view()),
     path('tickets-search/', TicketsSearch.as_view()),
+    path('tickets-cycles/', TicketCycle.as_view()),
+    path('tickets-exchange-offer/', TicketExchangeOffer.as_view()),
 
 
 ]
