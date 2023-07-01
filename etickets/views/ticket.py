@@ -1,3 +1,5 @@
+import random
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -15,8 +17,6 @@ class TicketsList(APIView):
         return Response(tickets)
 
 # get all available tickets' locations
-
-
 class TicketsLocations(APIView):
     @error_decorator
     def get(self, request):
@@ -100,9 +100,14 @@ class TicketExchangeOffer(APIView):
         own_ticket_id = request.data.get('own_ticket_id')
         wished_ticket_id = request.data.get('wished_ticket_id')
 
+        # query = f'''
+        #     MATCH (o:Ticket), (w:Ticket)
+        #     WHERE ID(o)={own_ticket_id} AND ID(w) = {wished_ticket_id}
+        #     CREATE (o)-[:EXCHANGE_OFFER]->(w)
+        # '''
         query = f'''
             MATCH (o:Ticket), (w:Ticket)
-            WHERE ID(o)={own_ticket_id} AND ID(w) = {wished_ticket_id}
+            WHERE o.uid="{own_ticket_id}" AND w.uid = "{wished_ticket_id}"
             CREATE (o)-[:EXCHANGE_OFFER]->(w)
         '''
         try:
@@ -126,12 +131,18 @@ class TicketCycle(APIView):
         # create arc between own_ticket and wished_ticket
 
         # check if there are circles after the arc creation
+        # query = f'''
+        #     MATCH n=(t:Ticket)-[*1..10]->(t)
+        #     WHERE ID(t) = {id}
+        #     RETURN n
+        # '''
+
         query = f'''
             MATCH n=(t:Ticket)-[*1..10]->(t)
-            WHERE ID(t) = {id}
+            WHERE t.uid = "{id}"
             RETURN n
         '''
-
+        
         # Execute the query
         results, _ = db.cypher_query(query)
 
@@ -145,3 +156,75 @@ class TicketCycle(APIView):
             nodes_for_cycle[idx]=list_node_c
         
         return Response(nodes_for_cycle)
+    
+
+# create fake cycle data
+class TicketFakeCycle(APIView):
+    @error_decorator
+    def post(self, request):
+        ticket_uid = request.data['ticket_uid']
+        cycle_length = request.data['cycle_length']
+        
+        # create a cycle of at least `cycle_length` that `ticket_uid` is involved in 
+        
+        # get ticket node with uid = ticket_uid
+        target_ticket = Ticket.nodes.get(uid=ticket_uid)
+        
+        # get random tickets (until `cycle_length`) that are not the target ticket
+        tickets = [ticket for ticket in Ticket.nodes.exclude(uid=ticket_uid).all()]
+        random_tickets = random.sample(tickets, cycle_length-1)
+        
+        # create a cycle of relationships
+        for idx, ticket in enumerate(random_tickets):
+            if idx == 0:
+                target_ticket.interests.connect(ticket)
+            else:
+                random_tickets[idx-1].interests.connect(ticket)
+                
+        # connect last ticket to target ticket
+        random_tickets[-1].interests.connect(target_ticket)
+         
+        return Response({'message': 'Cycle created successfully'})
+
+# create fake cycle data in which only one ticket is needed to complete the cycle. Return that ticket
+class OneLeftTicketFakeCycle(APIView):
+    @error_decorator
+    def post(self, request):
+        cycle_length = request.data['cycle_length']
+        seed = request.data.get('seed', 0)
+        ticket_type = request.data.get('ticket_type', None)
+        
+        # set random seed
+        random.seed(seed)
+         
+        # get random tickets (until `cycle_length`)
+        tickets = [ticket for ticket in Ticket.nodes.all()]
+        
+        # filter by ticket type, if provided
+        if ticket_type:
+            tickets = [ticket for ticket in tickets if ticket.type == ticket_type]
+        
+        random_tickets = random.sample(tickets, cycle_length)
+        
+        # create a cycle of relationships
+        for idx, ticket in enumerate(random_tickets):
+            if idx == 0:
+                pass
+            else:
+                random_tickets[idx-1].interests.connect(ticket)
+                
+        # connect last ticket to first ticket
+        random_tickets[-1].interests.connect(random_tickets[0])
+        
+        # return the ticket hat is left to complete the cycle and the ticket it should be connected to
+        return Response({
+            'ticket_uid': random_tickets[0].uid,
+            'ticket_name': random_tickets[0].name,
+            'target_ticket_uid': random_tickets[-1].uid,
+            'target_ticket_name': random_tickets[-1].name,
+        })
+    
+         
+        
+             
+         

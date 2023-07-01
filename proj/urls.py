@@ -20,8 +20,8 @@ urlpatterns = [
     path('tickets-search/', TicketsSearch.as_view()),
     path('tickets-cycles/', TicketCycle.as_view()),
     path('tickets-exchange-offer/', TicketExchangeOffer.as_view()),
-
-
+    path('tickets-fake-cycle/', TicketFakeCycle.as_view()),
+    path('seed/build/', OneLeftTicketFakeCycle.as_view()),
 ]
 
-create_fake_data()
+# create_fake_data()
