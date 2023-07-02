@@ -20,17 +20,14 @@ urlpatterns = [
     path('tickets-search/', TicketsSearch.as_view()),
     path('tickets-cycles/', TicketCycle.as_view()),
     path('tickets-exchange-offer/', TicketExchangeOffer.as_view()),
-<<<<<<< HEAD
     path('tickets-train/', ModelTrain.as_view()),
     path('tickets-prediction/', TicketPredictionEXCHANGE_OFFER.as_view()),
     path('dashboard/for-me/', Top10TicketsForMe.as_view()),
     path('tickets-sintetic-data/', CreateFakeData.as_view()),
 
 
-=======
     path('tickets-fake-cycle/', TicketFakeCycle.as_view()),
     path('seed/build/', OneLeftTicketFakeCycle.as_view()),
->>>>>>> a7af058fc11b14a0904d609832e4728c65bb6dba
 ]
 
 # create_fake_data()

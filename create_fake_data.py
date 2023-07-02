@@ -311,7 +311,7 @@ def create_fake_data(n_users: int = 10):
             except Exception as e:
                 print(f'Error creating ticket {ticket}. Error: {e}')
 
-    def create_random_date(min_datetime=datetime(2022, 6, 1), max_datetime=datetime(2023, 6, 1)):
+def create_random_date(min_datetime=datetime(2022, 6, 1), max_datetime=datetime(2023, 6, 1)):
     delta = max_datetime - min_datetime
     delta_seconds = delta.total_seconds()
 
@@ -319,10 +319,7 @@ def create_fake_data(n_users: int = 10):
     random_datetime = min_datetime + timedelta(seconds=random_seconds)
     return random_datetime
 
-
-
-
-def create_fake_data(n_users: int = 100, n_tickets: int = 500, n_trades: int = 2, n_tickets_per_user_min=1,n_tickets_per_user_max=10):
+def create_fake_data_2(n_users: int = 100, n_tickets: int = 500, n_trades: int = 2, n_tickets_per_user_min=1,n_tickets_per_user_max=10):
 
     # def create_fake_data(n_users: int = 10):
     # Create users

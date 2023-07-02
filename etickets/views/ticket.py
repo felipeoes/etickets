@@ -18,7 +18,7 @@ import os
 import numpy as np
 import random
 
-from create_fake_data import create_fake_data
+from create_fake_data import create_fake_data, create_fake_data_2
 
 random.seed(1)
 
@@ -339,6 +339,7 @@ class CreateFakeData(APIView):
     @error_decorator
     def post(self, request):
         create_fake_data()
+        create_fake_data_2()
         try:
             response_data = {'message': 'Relationship created successfully'}
             return Response(response_data, status=status.HTTP_201_CREATED)
