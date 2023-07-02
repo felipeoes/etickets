@@ -308,6 +308,11 @@ def create_fake_data(n_users: int = 10):
             try:
                 ticket.save()
                 tickets.append(ticket)
+                
+                # connect random user to ticket
+                random_user = random.choice(users)
+                random_user.tickets.connect(ticket)
+                random_user.save()
             except Exception as e:
                 print(f'Error creating ticket {ticket}. Error: {e}')
 
