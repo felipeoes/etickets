@@ -16,10 +16,8 @@ TRANSACTION_STATUSES = (
     (2, 'Recusada'),
 )
 
-<<<<<<< HEAD
 class BasicPropertiesRelationship(StructuredRel):
     start_relationship_date = DateTimeProperty(required=True)
-=======
 # TICKET_TYPES = (
 #     (0, 'show'),
 #     (1, 'basketball'),
@@ -30,7 +28,6 @@ class BasicPropertiesRelationship(StructuredRel):
 # )
      
 
->>>>>>> a7af058fc11b14a0904d609832e4728c65bb6dba
 
 class User(StructuredNode):
     uid = UniqueIdProperty()
