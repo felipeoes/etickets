@@ -84,6 +84,7 @@ class Ticket(StructuredNode):
             'uid': self.uid,
             'name': self.name,
             'event': self.event,
+            'type': self.type,
             'sector': self.sector,
             'datetime': self.datetime,
             'location': self.location,
