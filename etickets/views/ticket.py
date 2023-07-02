@@ -68,7 +68,20 @@ class TicketsSearch(APIView):
         
         # Filter tickets by name or event and order by datetime
         tickets = Ticket.nodes.filter(**{field + '__icontains': value for field, value in fields if value}).order_by('-datetime')
-        tickets = [ticket.to_dict() for ticket in tickets]
+    
+        tickets = [
+            {
+                'uid': ticket.uid,
+                'name': ticket.name,
+                'event': ticket.event,
+                'type': ticket.type,
+                'sector': ticket.sector,
+                'datetime': ticket.datetime,
+                'location': ticket.location,
+                'quantity': ticket.quantity,
+                'user_email': db.cypher_query(f"MATCH (u:User)-[:HAS_TICKET]->(t:Ticket) WHERE t.uid='{ticket.uid}' RETURN u")[0][0][0]['email']
+            } for ticket in tickets
+        ]
         
         return Response(tickets)
      
