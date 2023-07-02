@@ -2,7 +2,7 @@ asgiref==3.6.0
 colorama==0.4.6
 Django==4.2.1
 django-environ==0.10.0
-django-neomodel==0.1.0
+django-neomodel==0.0.7
 djangorestframework==3.14.0
 Faker==18.11.2
 gensim==4.3.1
