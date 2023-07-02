@@ -352,9 +352,18 @@ def create_fake_data_2(n_users: int = 100, n_tickets: int = 500, n_trades: int =
                 name=f'Ingresso {i+n_tickets_per_user_total}',
                 event=f'Evento {i+n_tickets_per_user_total}',
                 datetime=datetime.now(),
+                type=f'Type {i+n_tickets_per_user_total}',
                 sector=f'Setor {i+n_tickets_per_user_total}',
                 location=f'Local {i+n_tickets_per_user_total}'
             )
+            # ticket = Ticket(
+            #     name=ticket['name'],
+            #     event=show['name'],
+            #     datetime=show['datetime'],
+            #     sector=ticket['sector'],
+            #     type=ticket['type'],
+            #     location=show['location']
+            #     )            
             try:
 
                 # increase quantity of owned ticket
@@ -371,7 +380,7 @@ def create_fake_data_2(n_users: int = 100, n_tickets: int = 500, n_trades: int =
         for user2 in users2_sample:
             if users.index(user1) != users.index(user2):
                 qtd_samples1 = random.randint(0,int(len(user1.tickets.all())*.2))
-                qtd_samples2 = random.randint(0,int(len(user1.tickets.all())*.2))
+                qtd_samples2 = random.randint(0,int(len(user2.tickets.all())*.2))
                 # random subset sample of all the user1 tickets
                 choosen_ticket_user1 = random.sample(user1.tickets.all(),qtd_samples1)
                 choosen_ticket_user2 = random.sample(user2.tickets.all(),qtd_samples2)

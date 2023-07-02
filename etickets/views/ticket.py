@@ -17,6 +17,7 @@ from django.conf import settings
 import os
 import numpy as np
 import random
+import traceback
 
 from create_fake_data import create_fake_data, create_fake_data_2
 
@@ -193,6 +194,11 @@ class TicketPredictionEXCHANGE_OFFER(APIView):
         # Execute the query
         results_without_EXCHANGE_OFFER_top10, _ = db.cypher_query(query)
 
+        if len(results_without_EXCHANGE_OFFER_top10)==0:
+            error_message = 'Query return null'
+            response_data = {'error': error_message}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)        
+
         negative_edges_new = np.array([np.concatenate([model.wv[dict(result[0])['uid']],model.wv[dict(result[1])['uid']]]) for idx, result in enumerate(results_without_EXCHANGE_OFFER_top10)])
 
         # rf_classifier
@@ -302,38 +308,49 @@ class ModelTrain(APIView):
 class Top10TicketsForMe(APIView):
     @error_decorator
     def get(self, request): 
-        email = request.GET.get('email', '')
-        # load the model embedding
-        file_path = os.path.join(settings.BASE_DIR, 'embedding_model.model')
-        model = Word2Vec.load(file_path)
+        try:
+            email = request.GET.get('email', '')
+            # load the model embedding
+            file_path = os.path.join(settings.BASE_DIR, 'embedding_model.model')
+            model = Word2Vec.load(file_path)
 
-        # load the random forest model
-        file_path = os.path.join(settings.BASE_DIR, "ml_model.pkl")
-        with open(file_path, 'rb') as file:
-            rf_classifier = pickle.load(file)        
+            # load the random forest model
+            file_path = os.path.join(settings.BASE_DIR, "ml_model.pkl")
+            with open(file_path, 'rb') as file:
+                rf_classifier = pickle.load(file)        
 
-        query = """
-        MATCH (u1:User)-[:HAS_TICKET]-(t1:Ticket),(u2:User)-[:HAS_TICKET]-(t2:Ticket)
-        WHERE NOT EXISTS((t1)-[:EXCHANGE_OFFER]-(t2)) and t1.name < t2.name and u1.name < u2.name and u1.email ="{}"
-        RETURN t1,t2
-        """.format(email)
+            query = """
+            MATCH (u1:User)-[:HAS_TICKET]-(t1:Ticket),(u2:User)-[:HAS_TICKET]-(t2:Ticket)
+            WHERE NOT EXISTS((t1)-[:EXCHANGE_OFFER]-(t2)) and t1.name < t2.name and u1.name < u2.name and u1.email ="{}"
+            RETURN t1,t2
+            """.format(email)
 
-        # Execute the query
-        results_without_EXCHANGE_OFFER_top10, _ = db.cypher_query(query)
+            # Execute the query
+            results_without_EXCHANGE_OFFER_top10, _ = db.cypher_query(query)
 
-        negative_edges_new = np.array([np.concatenate([model.wv[dict(result[0])['uid']],model.wv[dict(result[1])['uid']]]) for idx, result in enumerate(results_without_EXCHANGE_OFFER_top10)])
+            if len(results_without_EXCHANGE_OFFER_top10)==0:
+                error_message = 'Query return null'
+                response_data = {'error': error_message}
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        predictions_proba = rf_classifier.predict_proba(negative_edges_new)
-        # Return the sorted nodes in terms of probability to have a EXCHANGE_OFFER
+            negative_edges_new = np.array([np.concatenate([model.wv[dict(result[0])['uid']],model.wv[dict(result[1])['uid']]]) for idx, result in enumerate(results_without_EXCHANGE_OFFER_top10)])            
 
-        top10_tickets = np.array([dict(result[1]) for result in results_without_EXCHANGE_OFFER_top10])[np.lexsort(predictions_proba.T[::-1])][:10]
-        my_tickets = np.array([dict(result[0]) for result in results_without_EXCHANGE_OFFER_top10])[np.lexsort(predictions_proba.T[::-1])][:10]
-        my_tickets_uid = [ticket['uid'] for ticket in my_tickets]
-        for idx,ticket in enumerate(top10_tickets):
-            ticket['my_ticket_id']=my_tickets_uid[idx]
-        
-        top10_tickets = {'ticket':top10_tickets}
-        return Response(top10_tickets)
+            predictions_proba = rf_classifier.predict_proba(negative_edges_new)
+            # Return the sorted nodes in terms of probability to have a EXCHANGE_OFFER
+
+            top10_tickets = np.array([dict(result[1]) for result in results_without_EXCHANGE_OFFER_top10])[np.lexsort(predictions_proba.T[::-1])][:10]
+            my_tickets = np.array([dict(result[0]) for result in results_without_EXCHANGE_OFFER_top10])[np.lexsort(predictions_proba.T[::-1])][:10]
+            my_tickets_uid = [ticket['uid'] for ticket in my_tickets]
+            for idx,ticket in enumerate(top10_tickets):
+                ticket['my_ticket_id']=my_tickets_uid[idx]
+            
+            top10_tickets = {'ticket':top10_tickets}
+            return Response(top10_tickets)
+        except Exception as e:
+            error_message = str(e)
+            response_data = {'error': error_message}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CreateFakeData(APIView):
     @error_decorator
