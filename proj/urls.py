@@ -19,6 +19,7 @@ urlpatterns = [
     path('tickets-locations/', TicketsLocations.as_view()),
     path('tickets-search/', TicketsSearch.as_view()),
     path('tickets-cycles/', TicketCycle.as_view()),
+    path('tickets-exchange/', TicketExchange.as_view()),
     path('tickets-exchange-offer/', TicketExchangeOffer.as_view()),
     path('tickets-train/', ModelTrain.as_view()),
     path('tickets-prediction/', TicketPredictionEXCHANGE_OFFER.as_view()),

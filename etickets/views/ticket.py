@@ -148,6 +148,47 @@ class TicketExchangeOffer(APIView):
             response_data = {'error': error_message}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
+class TicketExchange(APIView):
+    @error_decorator
+    def post(self, request):
+        own_user_email = request.data.get('own_user_email', '')
+        wished_ticket_user_email = request.data.get('wished_ticket_user_email', '')
+
+        own_ticket_id = request.data.get('own_ticket_id', '')
+        wished_ticket_id = request.data.get('wished_ticket_id', '')
+
+        own_ticket = Ticket.nodes.get(uid=own_ticket_id)
+        own_ticket_user = User.nodes.get(email=own_user_email)
+        
+        if not own_ticket or not own_ticket_user:
+            raise Exception('Own ticket or user not found')
+        
+        wished_ticket = Ticket.nodes.get(uid=wished_ticket_id)
+        wished_ticket_user = User.nodes.get(email=wished_ticket_user_email)
+        
+        if not wished_ticket or not wished_ticket_user:
+            raise Exception('Wished ticket or user not found')
+        
+        # exchange tickets
+        # if not own_ticket_user.tickets.is_connected(own_ticket):
+        #     raise Exception('Own ticket not found')
+        
+        # if not wished_ticket_user.tickets.is_connected(wished_ticket):
+        #     raise Exception('Wished ticket not found')
+        own_ticket_user.tickets.disconnect(own_ticket)
+        wished_ticket_user.tickets.disconnect(wished_ticket)
+        
+        own_ticket_user.tickets.connect(wished_ticket)
+        wished_ticket_user.tickets.connect(own_ticket)
+        
+        own_ticket_user.save()
+        wished_ticket_user.save()
+        
+        response_data = {'message': 'Tickets exchanged successfully'}
+        return Response(response_data, status=status.HTTP_201_CREATED)
+     
+        
+
 # Class that returns the node IDs of all nodes in a cycle (if any)
 class TicketCycle(APIView):
     @error_decorator

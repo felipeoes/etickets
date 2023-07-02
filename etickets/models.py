@@ -27,8 +27,7 @@ class BasicPropertiesRelationship(StructuredRel):
 #     (5, 'other'),
 # )
      
-
-
+     
 class User(StructuredNode):
     uid = UniqueIdProperty()
     name = StringProperty(required=True)
@@ -60,7 +59,6 @@ class User(StructuredNode):
             'city': self.city,
             'state': self.state,
         }
-
 
 class Ticket(StructuredNode):
     uid = UniqueIdProperty()
