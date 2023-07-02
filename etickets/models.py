@@ -7,7 +7,8 @@
 # Entretanto, estes ambientes se tornaram propicios para cometerem fraudes como ingressos falsos e falta de pagamento.
 # Neste cenário, nossa plataforma busca utilizar o potencial do banco de dados grafos para automatizar essas transações e fazer trocas dinâmicas entre os usuários.
 
-from neomodel import StructuredNode, StringProperty, IntegerProperty, DateTimeProperty, UniqueIdProperty, RelationshipTo
+from neomodel import StructuredNode, StringProperty, IntegerProperty, DateTimeProperty, UniqueIdProperty, RelationshipTo, StructuredRel
+from datetime import datetime
 
 TRANSACTION_STATUSES = (
     (0, 'Pendente'),
@@ -15,6 +16,8 @@ TRANSACTION_STATUSES = (
     (2, 'Recusada'),
 )
 
+class BasicPropertiesRelationship(StructuredRel):
+    start_relationship_date = DateTimeProperty(required=True)
 
 class User(StructuredNode):
     uid = UniqueIdProperty()
@@ -57,7 +60,7 @@ class Ticket(StructuredNode):
     location = StringProperty(required=True)
     sector = StringProperty(required=True)
     quantity = IntegerProperty(default=0)
-    interests = RelationshipTo('Ticket', 'EXCHANGE_OFFER')
+    interests = RelationshipTo('Ticket', 'EXCHANGE_OFFER', model=BasicPropertiesRelationship)
 
     def __str__(self):
         return self.name
@@ -93,3 +96,4 @@ class Trade(StructuredNode):
             'uid': self.uid,
             'status': self.status,
         }
+
