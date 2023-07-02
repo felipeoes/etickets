@@ -16,8 +16,21 @@ TRANSACTION_STATUSES = (
     (2, 'Recusada'),
 )
 
+<<<<<<< HEAD
 class BasicPropertiesRelationship(StructuredRel):
     start_relationship_date = DateTimeProperty(required=True)
+=======
+# TICKET_TYPES = (
+#     (0, 'show'),
+#     (1, 'basketball'),
+#     (2, 'cinema'),
+#     (3, 'theater'),
+#     (4, 'football'),
+#     (5, 'other'),
+# )
+     
+
+>>>>>>> a7af058fc11b14a0904d609832e4728c65bb6dba
 
 class User(StructuredNode):
     uid = UniqueIdProperty()
@@ -59,6 +72,7 @@ class Ticket(StructuredNode):
     datetime = DateTimeProperty(required=True)
     location = StringProperty(required=True)
     sector = StringProperty(required=True)
+    type = StringProperty(required=True)
     quantity = IntegerProperty(default=0)
     interests = RelationshipTo('Ticket', 'EXCHANGE_OFFER', model=BasicPropertiesRelationship)
 
