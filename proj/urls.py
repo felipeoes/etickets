@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path
-
 from etickets.views.user import *
 from etickets.views.ticket import *
 from create_fake_data import create_fake_data
@@ -12,6 +11,7 @@ urlpatterns = [
     path('users/list/', UsersList.as_view()),
     path('users/<str:email>/', UserDetail.as_view()),
     path('users-interests/', UserInterest.as_view()),
+    path('user-tickets/', UserTickets.as_view()),
 
     # TICKETS
     path('tickets/list/', TicketsList.as_view()),

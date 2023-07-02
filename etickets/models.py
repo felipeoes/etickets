@@ -17,7 +17,7 @@ TRANSACTION_STATUSES = (
 )
 
 class BasicPropertiesRelationship(StructuredRel):
-    start_relationship_date = DateTimeProperty(required=True)
+    start_relationship_date = DateTimeProperty(required=False)
 # TICKET_TYPES = (
 #     (0, 'show'),
 #     (1, 'basketball'),

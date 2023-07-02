@@ -30,6 +30,19 @@ class TicketsList(APIView):
         tickets = [user.to_dict() for user in Ticket.nodes.all()]
         return Response(tickets)
 
+class UserTickets(APIView):
+    @error_decorator
+    def get(self, request):
+        user_email = request.GET.get('email', '')
+        user = User.nodes.get_or_none(email=user_email)
+        if user is None:
+            raise Exception('User not found')
+        
+        tickets = [ticket.to_dict() for ticket in user.tickets.all()]
+        return Response(tickets)
+     
+
+
 # get all available tickets' locations
 class TicketsLocations(APIView):
     @error_decorator
@@ -49,7 +62,9 @@ class TicketsSearch(APIView):
     @error_decorator
     def get(self, request, *args, **kwargs):
         fields = [('name', request.GET.get('name', '')),
-                  ('event', request.GET.get('event', ''))]
+                  ('event', request.GET.get('event', '')),
+                  ('type', request.GET.get('type', '')),
+                  ]
         
         # Filter tickets by name or event and order by datetime
         tickets = Ticket.nodes.filter(**{field + '__icontains': value for field, value in fields if value}).order_by('-datetime')
@@ -413,26 +428,31 @@ class OneLeftTicketFakeCycle(APIView):
             tickets = [ticket for ticket in tickets if ticket.type == ticket_type]
         
         random_tickets = random.sample(tickets, cycle_length)
+        random_users  = random.sample(User.nodes.all(), cycle_length)
         
         # create a cycle of relationships
         for idx, ticket in enumerate(random_tickets):
             if idx == 0:
                 pass
             else:
+                # add user to ticket
+                random_users[idx-1].tickets.connect(ticket)
+                
+                # add interest relationship
                 random_tickets[idx-1].interests.connect(ticket)
                 
         # connect last ticket to first ticket
+        random_users[-1].tickets.connect(random_tickets[0])
         random_tickets[-1].interests.connect(random_tickets[0])
         
-        # return the ticket hat is left to complete the cycle and the ticket it should be connected to
+        
+        # return the ticket hat is left to complete the cycle and the ticket it should be connected to, as well as its respective users
         return Response({
             'ticket_uid': random_tickets[0].uid,
             'ticket_name': random_tickets[0].name,
+            'ticker_user_email': random_users[0].email,
             'target_ticket_uid': random_tickets[-1].uid,
             'target_ticket_name': random_tickets[-1].name,
+            'target_ticket_user_email': random_users[-1].email,
         })
     
-         
-        
-             
-         
